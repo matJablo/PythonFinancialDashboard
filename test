@@ -1,14 +1,16 @@
-import pandas as pd
-from pandas import ExcelWriter
-from pandas import ExcelFile
-import plotly.express as px
-import numpy as np
-
-df=pd.read_excel("Book2.xlsx",sheet_name='Book1')
 #information about the columns
 #df.info(verbose=True, null_counts=True)
 sales=df['Money July']
-grouped_by_months = df.groupby(by=['Bank']).sum()[['Money July']]
-print(grouped_by_months.head(12))
-ax2= px.treemap(df,path=['Bank'],values=sales,title="Popularity of the bought car models:")
-ax2.show()
+#grouped_by_months = df1.groupby(by=['Account']).sum()[['Money']]
+#print(grouped_by_months.head(12))
+#print(df1["Money"].describe())
+#df1['Money'] = df['Money'].astype('int')
+
+#df1['Money'] = df1['Money'].astype('int')
+#print(df1['Money'].describe())
+#ax2= px.treemap(df,path=['Bank'],values=sales,title="Popularity of the bought car models:")
+#ax2.show()
+
+team_points=df1[["Money","Account"]].groupby('Account').sum()
+team_points.sort_values(by=['Money'], inplace=True, ascending=False)
+print(team_points)
