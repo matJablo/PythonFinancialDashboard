@@ -1,6 +1,58 @@
+import pandas as pd
+from pandas import ExcelWriter
+from pandas import ExcelFile
+import numpy as np
+import plotly
+import plotly.express as px
+import plotly.graph_objects as go
+import matplotlib.pyplot as plt
+import calendar
+
+
+#df=pd.read_excel("Book2.xlsx",sheet_name='Book1')
+#df1-arkusz 2 dotyczacy planera rozdysponowania miesiecznych zarobkow
+df1=pd.read_excel("Book2.xlsx",sheet_name='Book2')
+#df1 = df1.apply(lambda x: pd.to_numeric(x,errors='ignore'))
+#wykres treemap dla ostatniego miesiaca
+dfer= df1[df1.Month == "August"]
+sales=dfer['Money']
+ax2= px.treemap(dfer,path=['Account'],values=sales,title="Stan kont dla ostatniego miesiaca:")
+#ax2.show()
+
+
+df1.Month=df1.Month.str.capitalize() #capitalizes the series
+d={i:e for e,i in enumerate(calendar.month_abbr)} #creates a dictionary
+#d={i[:3]:e for e,i in enumerate(calendar.month_name)}
+df1.reindex(df1.Month.map(d).sort_values().index) #map + sort_values + reindex with index
+
+#model_trans2=df1
+#model_fuel2= model_trans2.groupby('Month')
+#model_trans2 = model_trans2[model_trans2.Account == "Mbank"]
+#model_trans2.plot(kind = 'bar', label = 'Wakajki', figsize = (4, 4))
+#plt.xlabel('Month', fontsize = 16)
+#plt.ylabel('Money', fontsize = 16)
+#plt.show()
+
+#wykres dla pojedynczych celow slupkowy (dziala)
+gry=df1[df1.Account == "Auto"]
+countries= gry.groupby('Month')['Money'].sum()
+countries = pd.DataFrame(countries)
+countries.columns = ['Money']
+countries.sort_values(by=['Month'], inplace=True, ascending=True)
+#usuwanie numerkow przed miesiacem
+countries.index = [x.split()[1] for x in countries.index]
+countries.index = countries.index.str.capitalize()
+#countries.plot.bar()
+countries.plot(kind = 'bar', label = 'Wakajki', figsize = (4, 4))
+plt.xlabel('Month', fontsize = 16)
+plt.ylabel('Money', fontsize = 16)
+plt.show()
+
+#countries = countries.head(4)
+#print(countries.head(4))
+
 #information about the columns
 #df.info(verbose=True, null_counts=True)
-sales=df['Money July']
 #grouped_by_months = df1.groupby(by=['Account']).sum()[['Money']]
 #print(grouped_by_months.head(12))
 #print(df1["Money"].describe())
@@ -8,9 +60,10 @@ sales=df['Money July']
 
 #df1['Money'] = df1['Money'].astype('int')
 #print(df1['Money'].describe())
-#ax2= px.treemap(df,path=['Bank'],values=sales,title="Popularity of the bought car models:")
-#ax2.show()
 
-team_points=df1[["Money","Account"]].groupby('Account').sum()
-team_points.sort_values(by=['Money'], inplace=True, ascending=False)
-print(team_points)
+
+#team_points=df1[["Money","Account"]].groupby('Account').sum()
+#team_points.sort_values(by=['Money'], inplace=True, ascending=False)
+#print(team_points)
+
+
