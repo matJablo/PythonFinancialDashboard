@@ -16,7 +16,8 @@ st.set_page_config(page_title="FINANCIAL",
                    page_icon=":wink:",
                    layout="wide"
 )
-
+--server.enableWebsocketCompression=false
+--server.enableXsrfProtection=false
 #df=pd.read_excel("Book2.xlsx",sheet_name='Book1')
 
 #df1 - arkusz 2 dotyczacy planera rozdysponowania miesiecznych zarobkow
