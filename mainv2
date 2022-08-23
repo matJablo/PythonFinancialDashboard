@@ -9,16 +9,22 @@ app = Dash(__name__)
 
 
 excel="Book2.xlsx"
-#df1 - arkusz 2 dotyczacy planera rozdysponowania miesiecznych zarobkow
+#df1 - arkusz 2 dotyczacy stanu kont
 df=pd.read_excel(excel,sheet_name='Book2')
+#df1 - arkusz 3 dotyczacy planera rozdysponowania miesiecznych zarobkow
+df1=pd.read_excel(excel,sheet_name='Book3')
+
+#df1 = px.data.gapminder().query("year == 2022")
+sales1=df1['Money1']
 
 dftree= df[df.Month == "08 August"]
 #filtrowanie po pieniądzach
 sales=dftree['Money']
 
 fig = px.treemap(dftree,path=['Account'],values=sales,title="Stan Kont Bankowych Dla Ostatniego Miesiąca:")
-fig1 = px.treemap(dftree,path=['Account'],values=sales,title="Stan Kont Bankowych Dla Ostatniego Miesiąca:")
-
+#fig1 = px.treemap(dftree,path=['Account'],values=sales,title="Stan Kont Bankowych Dla Ostatniego Miesiąca:")
+fig2 = px.pie(df1,values=sales1,names=df1["Goal"], title='Pensja, rozplanowanie', hole=.1)
+fig2.update_traces(textposition='inside', textinfo='percent+label')
 cel_auto=df[df.Account == "Auto"]
 cel_auto_mies= cel_auto.groupby('Month')['Money'].sum()
 cel_auto_mies= pd.DataFrame(cel_auto_mies)
@@ -44,6 +50,11 @@ app.layout = html.Div(children=[
     dcc.Graph(
         id='example-graph1',
         figure=fig1
+    )
+,
+    dcc.Graph(
+        id='example-graph2',
+        figure=fig2
     )
 ])
 
