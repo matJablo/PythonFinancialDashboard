@@ -1,0 +1,51 @@
+# Run this app with `python app.py` and
+# visit http://127.0.0.1:8050/ in your web browser.
+
+from dash import Dash, html, dcc
+import plotly.express as px
+import pandas as pd
+
+app = Dash(__name__)
+
+
+excel="Book2.xlsx"
+#df1 - arkusz 2 dotyczacy planera rozdysponowania miesiecznych zarobkow
+df=pd.read_excel(excel,sheet_name='Book2')
+
+dftree= df[df.Month == "08 August"]
+#filtrowanie po pieniądzach
+sales=dftree['Money']
+
+fig = px.treemap(dftree,path=['Account'],values=sales,title="Stan Kont Bankowych Dla Ostatniego Miesiąca:")
+fig1 = px.treemap(dftree,path=['Account'],values=sales,title="Stan Kont Bankowych Dla Ostatniego Miesiąca:")
+
+cel_auto=df[df.Account == "Auto"]
+cel_auto_mies= cel_auto.groupby('Month')['Money'].sum()
+cel_auto_mies= pd.DataFrame(cel_auto_mies)
+cel_auto_mies.columns = ['Money']
+cel_auto_mies.sort_values(by=['Month'], inplace=True, ascending=True)
+#usuwanie numerkow przed miesiacem
+cel_auto_mies.index = [x.split()[1] for x in cel_auto_mies.index]
+cel_auto_mies.index = cel_auto_mies.index.str.capitalize()
+
+fig1 = px.bar(cel_auto_mies, x=cel_auto_mies.index, y='Money', title="Auto")
+
+app.layout = html.Div(children=[
+    html.H1(children='PODSUMOWANIE FINANSÓW'),
+
+    html.Div(children='''
+        Na podstawie danych własnych
+    '''),
+
+    dcc.Graph(
+        id='example-graph',
+        figure=fig
+    ),
+    dcc.Graph(
+        id='example-graph1',
+        figure=fig1
+    )
+])
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
