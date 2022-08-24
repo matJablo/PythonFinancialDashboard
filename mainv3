@@ -9,10 +9,12 @@ import plotly.graph_objects as go
 app = Dash(__name__)
 
 excel="Book2.xlsx"
-#df1 - arkusz 2 dotyczacy stanu kont
+#df - arkusz 2 dotyczacy stanu kont
 df=pd.read_excel(excel,sheet_name='Book2')
 #df1 - arkusz 3 dotyczacy planera rozdysponowania miesiecznych zarobkow
 df1=pd.read_excel(excel,sheet_name='Book3')
+#df2 - arkusz 4 dotyczacy miesiecznych wydatków
+df2=pd.read_excel(excel,sheet_name='Book4')
 
 
 sales1=df1['Money1']
@@ -51,8 +53,26 @@ fig5.add_trace(go.Pie(labels=df1["Goal"], values=sales1,
                      name="Miesiac Wrzesien 2022"), 1, 1)
 fig5.add_trace(go.Pie(labels=df1["Goal"], values=sales1,
                      name="Miesiac Pazdziernik 2022"), 1, 2)
-fig5.update_traces(textposition='inside', textinfo='percent+label')
+fig5.update_traces(textposition='inside', textinfo='percent+label+value')
 fig5.update_layout(
+    autosize=False,
+    width=1400,
+    height=700,
+    )
+
+
+sales2=df2['Money2']
+
+#podwojny wykres kołowy dla wydatkow miesiecznych
+fig6 = make_subplots(1, 2, specs=[[{'type':'domain'}, {'type':'domain'}]],
+                    subplot_titles=['Wrzesien', '?'])
+#fig5.add_trace(px.pie(df1,values=sales1,names=df1["Goal"], title='Pensja, rozplanowanie'), 1, 1)
+fig6.add_trace(go.Pie(labels=df2["Category"], values=sales2,
+                     name="Miesiac Wrzesien 2022"), 1, 1)
+fig6.add_trace(go.Pie(labels=df2["Category"], values=sales2,
+                     name="Miesiac Pazdziernik 2022"), 1, 2)
+fig6.update_traces(textposition='inside', textinfo='percent+label+value')
+fig6.update_layout(
     autosize=False,
     width=1400,
     height=700,
@@ -109,6 +129,10 @@ app.layout = html.Div(children=[
     dcc.Graph(
         id='example-graph3',
         figure=fig5
+    ),
+    dcc.Graph(
+        id='example-graph4',
+        figure=fig6
     )
 
 ])
