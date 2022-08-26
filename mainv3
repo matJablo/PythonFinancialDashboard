@@ -6,25 +6,34 @@ import plotly.express as px
 import pandas as pd
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import dash_bootstrap_components as dbc
 app = Dash(__name__)
 
 excel="Book2.xlsx"
 #df - arkusz 2 dotyczacy stanu kont
 df=pd.read_excel(excel,sheet_name='Book2')
+df= df[df.Month == "08 August"]
 #df1 - arkusz 3 dotyczacy planera rozdysponowania miesiecznych zarobkow
 df1=pd.read_excel(excel,sheet_name='Book3')
 #df2 - arkusz 4 dotyczacy miesiecznych wydatków
 df2=pd.read_excel(excel,sheet_name='Book4')
-
+#df3 - arkusz 5 dotyczacy korepetycji
+df3=pd.read_excel(excel,sheet_name='Book5')
+df3= df3[df3.Month == "08 August"]
+df3= df3[df3.Send == "Yes"]
 
 sales1=df1['Money1']
+sales2=df2['Money2']
+sales3=df['Money']
+sales4=df3['Cost']
+
 dftree= df[df.Month == "08 August"]
 #filtrowanie po pieniądzach
 sales=dftree['Money']
 
 
 #wykres pierwszy treemap dla stanu kont
-fig = px.treemap(dftree,path=['Account'],values=sales,title="Stan Kont Bankowych Dla Ostatniego Miesiąca:")
+fig = px.treemap(df,path=['Account'],values=sales3,title="Stan Kont Bankowych Dla Ostatniego Miesiąca:")
 #co jest wyswietlane
 fig.data[0].textinfo = 'label+value'
 #wielkosc tekstu
@@ -61,8 +70,6 @@ fig5.update_layout(
     )
 
 
-sales2=df2['Money2']
-
 #podwojny wykres kołowy dla wydatkow miesiecznych
 fig6 = make_subplots(1, 2, specs=[[{'type':'domain'}, {'type':'domain'}]],
                     subplot_titles=['Wrzesien', '?'])
@@ -78,6 +85,21 @@ fig6.update_layout(
     height=700,
     )
 
+#podwojny wykres kołowy dla pensji kategorie oraz korepetycje
+fig7 = make_subplots(1, 2, specs=[[{'type':'domain'}, {'type':'domain'}]],
+                    subplot_titles=['Kategorie Konta', 'Korepetycje Graf'])
+#fig5.add_trace(px.pie(df1,values=sales1,names=df1["Goal"], title='Pensja, rozplanowanie'), 1, 1)
+fig7.add_trace(go.Pie(labels=df["Category"], values=sales3,
+                     name="Miesiac Wrzesien 2022"), 1, 1)
+fig7.add_trace(go.Pie(labels=df3["Name"], values=sales4,
+                     name="Miesiac Wrzesien 2022"), 1, 2)
+fig7.update_traces(textposition='inside', textinfo='percent+label+value')
+fig7.update_layout(
+    autosize=False,
+    width=1400,
+    height=700,
+    )
+
 
 
 
@@ -87,17 +109,17 @@ fig6.update_layout(
 
 
 #filtorwanie wynikow dla zebranych pieniedzy auto
-cel_auto=df[df.Account == "Auto"]
-cel_auto_mies= cel_auto.groupby('Month')['Money'].sum()
-cel_auto_mies= pd.DataFrame(cel_auto_mies)
-cel_auto_mies.columns = ['Money']
-cel_auto_mies.sort_values(by=['Month'], inplace=True, ascending=True)
+#cel_auto=df[df.Account == "Auto"]
+#cel_auto_mies= cel_auto.groupby('Month')['Money'].sum()
+#cel_auto_mies= pd.DataFrame(cel_auto_mies)
+#cel_auto_mies.columns = ['Money']
+#cel_auto_mies.sort_values(by=['Month'], inplace=True, ascending=True)
 #usuwanie numerkow przed miesiacem
-cel_auto_mies.index = [x.split()[1] for x in cel_auto_mies.index]
-cel_auto_mies.index = cel_auto_mies.index.str.capitalize()
+#cel_auto_mies.index = [x.split()[1] for x in cel_auto_mies.index]
+#cel_auto_mies.index = cel_auto_mies.index.str.capitalize()
 
 #wykres 3 auto/zwykly graf kolumnowy
-fig1 = px.bar(cel_auto_mies, x=cel_auto_mies.index, y='Money', title="Auto")
+#fig1 = px.bar(cel_auto_mies, x=cel_auto_mies.index, y='Money', title="Auto")
 
 
 
@@ -116,11 +138,11 @@ app.layout = html.Div(children=[
         id='example-graph',
         figure=fig
     ),
-    dcc.Graph(
-        id='example-graph1',
-        figure=fig1
-    )
-,
+    #dcc.Graph(
+    #    id='example-graph1',
+    #    figure=fig1
+    #)
+#,
     #dcc.Graph(
     #    id='example-graph2',
     #    figure=fig2
@@ -133,6 +155,18 @@ app.layout = html.Div(children=[
     dcc.Graph(
         id='example-graph4',
         figure=fig6
+    ),    dcc.Graph(
+        id='example-graph5',
+        figure=fig7
+    ),
+    dbc.Card(
+        [
+            html.H2(f"{2*100:.2f}%", className="card-title"),
+            html.P("Model Test Accuracy", className="card-text"),
+        ],
+        body=True,
+        color="dark",
+        inverse=True,
     )
 
 ])
