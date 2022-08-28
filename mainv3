@@ -12,55 +12,65 @@ app = Dash(__name__)
 excel="Book2.xlsx"
 #df - arkusz 2 dotyczacy stanu kont
 df=pd.read_excel(excel,sheet_name='Book2')
-df= df[df.Month == "08 August"]
+skonta_sierp=df
+skonta_sierp=skonta_sierp[skonta_sierp.Month == "08 August"]
+skonta_sierp_stan=skonta_sierp['Money']
+
+
 #df1 - arkusz 3 dotyczacy planera rozdysponowania miesiecznych zarobkow
 df1=pd.read_excel(excel,sheet_name='Book3')
+zarobki_wrz=df1
+zarobki_wrz=zarobki_wrz[zarobki_wrz.Month == "09 September"]
+zarobki_wrz_kwota=zarobki_wrz['Money1']
+zarobki_sier=df1
+zarobki_sier=zarobki_sier[zarobki_sier.Month == "08 August"]
+zarobki_sier_kwota=zarobki_sier['Money1']
+
+
 #df2 - arkusz 4 dotyczacy miesiecznych wydatków
 df2=pd.read_excel(excel,sheet_name='Book4')
+wydatki_sierp=df2
+wydatki_sierp=wydatki_sierp[wydatki_sierp.Month == "08 August"]
+wydatki_sierp_kwota=wydatki_sierp['Money2']
+wydatki_wrzes=df2
+wydatki_wrzes=wydatki_wrzes[wydatki_wrzes.Month == "09 September"]
+wydatki_wrzes_kwota=wydatki_wrzes['Money2']
+
 #df3 - arkusz 5 dotyczacy korepetycji
 df3=pd.read_excel(excel,sheet_name='Book5')
-df3= df3[df3.Month == "08 August"]
-df3= df3[df3.Send == "Yes"]
+korki_sierp=df3[df3.Month == "08 August"]
+korki_wrzes= df3[df3.Month == "09 September"]
+korki_sierp= korki_sierp[korki_sierp.Send == "Yes"]
+korki_wrzes= korki_wrzes[korki_wrzes.Send == "Yes"]
 
-sales1=df1['Money1']
-sales2=df2['Money2']
-sales3=df['Money']
-sales4=df3['Cost']
+korki_sierp_kwota=korki_sierp['Cost']
+korki_wrzes_kwota=korki_wrzes['Cost']
 
-dftree= df[df.Month == "08 August"]
-#filtrowanie po pieniądzach
-sales=dftree['Money']
+
 
 
 #wykres pierwszy treemap dla stanu kont
-fig = px.treemap(df,path=['Account'],values=sales3,title="Stan Kont Bankowych Dla Ostatniego Miesiąca:")
+fig = px.treemap(skonta_sierp,path=['Account'],values=skonta_sierp_stan,title="Stan Kont Bankowych Dla Ostatniego Miesiąca:")
 #co jest wyswietlane
 fig.data[0].textinfo = 'label+value'
 #wielkosc tekstu
 fig.update_layout(uniformtext_minsize=16, uniformtext_mode='hide')
 
-#wykres 2, kołowy dla planowanego rozdysponowania pensji przed gdanskiem
-#fig2 = px.pie(df1,values=sales1,names=df1["Goal"], title='Pensja, rozplanowanie', hole=.1)
-#fig2.update_traces(textposition='inside', textinfo='percent+label')
-#fig2.update_layout(
-#    autosize=False,
-#    width=750,
-#    height=750,
-#    margin=dict(
-#        l=50,
-#        r=50,
-#        b=100,
-#        t=100,
-#        pad=4
-#    ))
+#wykres porownojacy stan kont miesiac po miesiacu
+fig8 = px.histogram(df, x="Account", y="Money",
+             color="Month",barmode='group',
+             height=400,title="Stan Kont w każdym miesiącc:").update_xaxes(categoryorder="total descending")
+
+
+
 
 #podwojny wykres kołowy dla planowanych zarobków
 fig5 = make_subplots(1, 2, specs=[[{'type':'domain'}, {'type':'domain'}]],
-                    subplot_titles=['Wrzesien', '?'])
+                    subplot_titles=['Wrzesien Pensja', 'Pazdziernik Pensja'])
 #fig5.add_trace(px.pie(df1,values=sales1,names=df1["Goal"], title='Pensja, rozplanowanie'), 1, 1)
-fig5.add_trace(go.Pie(labels=df1["Goal"], values=sales1,
+fig5.add_trace(go.Pie(labels=zarobki_sier["Goal"], values=zarobki_sier_kwota,
                      name="Miesiac Wrzesien 2022"), 1, 1)
-fig5.add_trace(go.Pie(labels=df1["Goal"], values=sales1,
+fig5.add_trace(go.Pie(labels=zarobki_wrz["Goal"], values=zarobki_wrz_kwota,
                      name="Miesiac Pazdziernik 2022"), 1, 2)
 fig5.update_traces(textposition='inside', textinfo='percent+label+value')
 fig5.update_layout(
@@ -72,11 +82,12 @@ fig5.update_layout(
 
 #podwojny wykres kołowy dla wydatkow miesiecznych
 fig6 = make_subplots(1, 2, specs=[[{'type':'domain'}, {'type':'domain'}]],
-                    subplot_titles=['Wrzesien', '?'])
+                    subplot_titles=['Wrzesien Wydatki', 'Październik Wydatki - puste'])
+
 #fig5.add_trace(px.pie(df1,values=sales1,names=df1["Goal"], title='Pensja, rozplanowanie'), 1, 1)
-fig6.add_trace(go.Pie(labels=df2["Category"], values=sales2,
+fig6.add_trace(go.Pie(labels=wydatki_sierp["Category"], values=wydatki_sierp_kwota,
                      name="Miesiac Wrzesien 2022"), 1, 1)
-fig6.add_trace(go.Pie(labels=df2["Category"], values=sales2,
+fig6.add_trace(go.Pie(labels=wydatki_wrzes["Category"], values=wydatki_wrzes_kwota,
                      name="Miesiac Pazdziernik 2022"), 1, 2)
 fig6.update_traces(textposition='inside', textinfo='percent+label+value')
 fig6.update_layout(
@@ -85,13 +96,13 @@ fig6.update_layout(
     height=700,
     )
 
-#podwojny wykres kołowy dla pensji kategorie oraz korepetycje
+#podwojny wykres kołowy dla korepetycji
 fig7 = make_subplots(1, 2, specs=[[{'type':'domain'}, {'type':'domain'}]],
-                    subplot_titles=['Kategorie Konta', 'Korepetycje Graf'])
+                    subplot_titles=['Korepetycje Wrzesień', 'Korepetycje Pazdziernik'])
 #fig5.add_trace(px.pie(df1,values=sales1,names=df1["Goal"], title='Pensja, rozplanowanie'), 1, 1)
-fig7.add_trace(go.Pie(labels=df["Category"], values=sales3,
+fig7.add_trace(go.Pie(labels=korki_sierp["Name"], values=korki_sierp_kwota,
                      name="Miesiac Wrzesien 2022"), 1, 1)
-fig7.add_trace(go.Pie(labels=df3["Name"], values=sales4,
+fig7.add_trace(go.Pie(labels=korki_wrzes["Name"], values=korki_wrzes_kwota,
                      name="Miesiac Wrzesien 2022"), 1, 2)
 fig7.update_traces(textposition='inside', textinfo='percent+label+value')
 fig7.update_layout(
@@ -150,7 +161,7 @@ app.layout = html.Div(children=[
 #,
     dcc.Graph(
         id='example-graph3',
-        figure=fig5
+        figure=fig8
     ),
     dcc.Graph(
         id='example-graph4',
@@ -158,6 +169,10 @@ app.layout = html.Div(children=[
     ),    dcc.Graph(
         id='example-graph5',
         figure=fig7
+    ),
+   dcc.Graph(
+        id='example-graph6',
+        figure=fig5
     ),
     dbc.Card(
         [
