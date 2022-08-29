@@ -15,6 +15,9 @@ df=pd.read_excel(excel,sheet_name='Book2')
 skonta_sierp=df
 skonta_sierp=skonta_sierp[skonta_sierp.Month == "08 August"]
 skonta_sierp_stan=skonta_sierp['Money']
+skonta_lip=df
+skonta_lip=skonta_lip[skonta_lip.Month == "07 July"]
+skonta_lip_stan=skonta_lip['Money']
 
 
 #df1 - arkusz 3 dotyczacy planera rozdysponowania miesiecznych zarobkow
@@ -112,25 +115,18 @@ fig7.update_layout(
     )
 
 
+#indicators
+
+fig9 = go.Figure(go.Indicator(
+    mode = "number+delta",
+    value = skonta_sierp_stan.sum(),
+    number = {'prefix': "zł"},
+    delta = {'position': "top", 'reference': skonta_lip_stan.sum(), "valueformat": "f"},
+    domain = {'x': [0, 1], 'y': [0, 1]}))
+fig9.update_layout(paper_bgcolor = "lightgray")
 
 
 
-
-
-
-
-#filtorwanie wynikow dla zebranych pieniedzy auto
-#cel_auto=df[df.Account == "Auto"]
-#cel_auto_mies= cel_auto.groupby('Month')['Money'].sum()
-#cel_auto_mies= pd.DataFrame(cel_auto_mies)
-#cel_auto_mies.columns = ['Money']
-#cel_auto_mies.sort_values(by=['Month'], inplace=True, ascending=True)
-#usuwanie numerkow przed miesiacem
-#cel_auto_mies.index = [x.split()[1] for x in cel_auto_mies.index]
-#cel_auto_mies.index = cel_auto_mies.index.str.capitalize()
-
-#wykres 3 auto/zwykly graf kolumnowy
-#fig1 = px.bar(cel_auto_mies, x=cel_auto_mies.index, y='Money', title="Auto")
 
 
 
@@ -160,6 +156,11 @@ app.layout = html.Div(children=[
     #)
 #,
     dcc.Graph(
+        id='example-graph11',
+        figure=fig9
+    ),
+
+    dcc.Graph(
         id='example-graph3',
         figure=fig8
     ),
@@ -173,15 +174,6 @@ app.layout = html.Div(children=[
    dcc.Graph(
         id='example-graph6',
         figure=fig5
-    ),
-    dbc.Card(
-        [
-            html.H2(f"{2*100:.2f}%", className="card-title"),
-            html.P("Model Test Accuracy", className="card-text"),
-        ],
-        body=True,
-        color="dark",
-        inverse=True,
     )
 
 ])
