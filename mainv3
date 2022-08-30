@@ -9,7 +9,12 @@ import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 app = Dash(__name__)
 
+
+
 excel="Book2.xlsx"
+
+#arkusze
+
 #df - arkusz 2 dotyczacy stanu kont
 df=pd.read_excel(excel,sheet_name='Book2')
 skonta_sierp=df
@@ -18,7 +23,17 @@ skonta_sierp_stan=skonta_sierp['Money']
 skonta_lip=df
 skonta_lip=skonta_lip[skonta_lip.Month == "07 July"]
 skonta_lip_stan=skonta_lip['Money']
+skonta_wrzes=df
 
+skonta_wrzes=skonta_wrzes[skonta_wrzes.Month == "09 September"]
+gielda=skonta_wrzes
+skonta_wrzes_stan=skonta_wrzes['Money']
+
+
+
+gieldateraz=gielda[gielda.Category == "gielda"]
+gieldateraz=gieldateraz['Money'].sum()
+#gieldapoprzednio= skonta_wrzes[skonta_wrzes.Account == "T212 Samochód"].sum()
 
 #df1 - arkusz 3 dotyczacy planera rozdysponowania miesiecznych zarobkow
 df1=pd.read_excel(excel,sheet_name='Book3')
@@ -50,10 +65,20 @@ korki_sierp_kwota=korki_sierp['Cost']
 korki_wrzes_kwota=korki_wrzes['Cost']
 
 
+#wartosci do zmian:
+autosplata=5100
+stankont_teraz=skonta_wrzes_stan.sum()
+stankont_poprzednio=skonta_sierp_stan.sum()
+wydatki_teraz=wydatki_wrzes_kwota.sum()
+wydatki_poprzednio=wydatki_sierp_kwota.sum()
+gielda_teraz=gieldateraz
+gielda_poprzednio=gieldateraz
+
+
 
 
 #wykres pierwszy treemap dla stanu kont
-fig = px.treemap(skonta_sierp,path=['Account'],values=skonta_sierp_stan,title="Stan Kont Bankowych Dla Ostatniego Miesiąca:")
+fig = px.treemap(skonta_wrzes,path=['Account'],values=skonta_wrzes_stan,title="Stan Kont Bankowych Dla Ostatniego Miesiąca:")
 #co jest wyswietlane
 fig.data[0].textinfo = 'label+value'
 #wielkosc tekstu
@@ -117,15 +142,32 @@ fig7.update_layout(
 
 #indicators
 
-fig9 = go.Figure(go.Indicator(
-    mode = "number+delta",
-    value = skonta_sierp_stan.sum(),
-    number = {'prefix': "zł"},
-    delta = {'position': "top", 'reference': skonta_lip_stan.sum(), "valueformat": "f"},
-    domain = {'x': [0, 1], 'y': [0, 1]}))
-fig9.update_layout(paper_bgcolor = "lightgray")
+#podwojny wykres kołowy dla korepetycji
+fig9 = make_subplots(2, 2, specs=[[{'type':'domain'}, {'type':'domain'}],[{'type':'domain'}, {'type':'domain'}]],
+                    subplot_titles=['SUMA WSZYSTKICH KONT', 'SUMA WYDATKÓW', 'SUMA GIEŁDA', ''])
 
 
+#suma wszystkich kont (poprzedni i ten miesiac)
+fig9.add_trace(go.Indicator(mode = "number+delta",value = stankont_teraz,number = {'prefix': "zł"},delta =
+{'position': "top", 'reference': stankont_poprzednio, "valueformat": "f"},domain = {'x': [0, 1], 'y': [0, 1]}), 1, 1)
+
+#suma wydatki wszystkie (poprzedni i ten miesiac)
+fig9.add_trace(go.Indicator(mode = "number+delta",value = wydatki_teraz,number = {'prefix': "zł"},delta =
+{'position': "top", 'reference': wydatki_poprzednio, "valueformat": "f"},domain = {'x': [0, 1], 'y': [0, 1]}), 1, 2)
+
+#suma giełda (poprzedni i ten miesiac)
+fig9.add_trace(go.Indicator(mode = "number+delta",value = gielda_teraz,number = {'prefix': "zł"},delta =
+{'position': "top", 'reference': gielda_teraz, "valueformat": "f"},domain = {'x': [0, 1], 'y': [0, 1]}), 2, 1)
+
+#wykres spłata kredytów
+fig9.add_trace(go.Indicator(
+    mode = "gauge+number",
+    number = {'prefix': "zł","valueformat": ".0f"},
+    value = autosplata,
+    title = {'text': "KREDYT"},
+    domain = {'x': [0, 1], 'y': [0, 1]},
+    gauge = {'axis': {'range': [-2, 30000]}}
+), 2, 2)
 
 
 
