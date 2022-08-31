@@ -24,16 +24,8 @@ skonta_lip=df
 skonta_lip=skonta_lip[skonta_lip.Month == "07 July"]
 skonta_lip_stan=skonta_lip['Money']
 skonta_wrzes=df
-
 skonta_wrzes=skonta_wrzes[skonta_wrzes.Month == "09 September"]
-gielda=skonta_wrzes
 skonta_wrzes_stan=skonta_wrzes['Money']
-
-
-
-gieldateraz=gielda[gielda.Category == "gielda"]
-gieldateraz=gieldateraz['Money'].sum()
-#gieldapoprzednio= skonta_wrzes[skonta_wrzes.Account == "T212 Samochód"].sum()
 
 #df1 - arkusz 3 dotyczacy planera rozdysponowania miesiecznych zarobkow
 df1=pd.read_excel(excel,sheet_name='Book3')
@@ -60,21 +52,25 @@ korki_sierp=df3[df3.Month == "08 August"]
 korki_wrzes= df3[df3.Month == "09 September"]
 korki_sierp= korki_sierp[korki_sierp.Send == "Yes"]
 korki_wrzes= korki_wrzes[korki_wrzes.Send == "Yes"]
-
 korki_sierp_kwota=korki_sierp['Cost']
 korki_wrzes_kwota=korki_wrzes['Cost']
 
+korki_teraz=df3
+korki_teraz=korki_teraz[korki_teraz.Month =="08 August"]
+korki_teraz=korki_teraz[korki_teraz.Send == "Yes"]
+
 
 #wartosci do zmian:
-autosplata=5100
+autosplata=6000
 stankont_teraz=skonta_wrzes_stan.sum()
 stankont_poprzednio=skonta_sierp_stan.sum()
 wydatki_teraz=wydatki_wrzes_kwota.sum()
 wydatki_poprzednio=wydatki_sierp_kwota.sum()
-gielda_teraz=gieldateraz
-gielda_poprzednio=gieldateraz
-
-
+gielda_teraz=5930
+gielda_poprzednio=0
+korki_teraz=korki_teraz["Cost"].sum()
+korki_poprzednio=0
+ilosc_miesiecy=(30000-autosplata)/500
 
 
 #wykres pierwszy treemap dla stanu kont
@@ -142,7 +138,7 @@ fig7.update_layout(
 
 #indicators
 
-#podwojny wykres kołowy dla korepetycji
+# 4 wykresy aby wyswietlic dane liczbowe
 fig9 = make_subplots(2, 2, specs=[[{'type':'domain'}, {'type':'domain'}],[{'type':'domain'}, {'type':'domain'}]],
                     subplot_titles=['SUMA WSZYSTKICH KONT', 'SUMA WYDATKÓW', 'SUMA GIEŁDA', ''])
 
@@ -157,7 +153,7 @@ fig9.add_trace(go.Indicator(mode = "number+delta",value = wydatki_teraz,number =
 
 #suma giełda (poprzedni i ten miesiac)
 fig9.add_trace(go.Indicator(mode = "number+delta",value = gielda_teraz,number = {'prefix': "zł"},delta =
-{'position': "top", 'reference': gielda_teraz, "valueformat": "f"},domain = {'x': [0, 1], 'y': [0, 1]}), 2, 1)
+{'position': "top", 'reference': gielda_poprzednio, "valueformat": "f"},domain = {'x': [0, 1], 'y': [0, 1]}), 2, 1)
 
 #wykres spłata kredytów
 fig9.add_trace(go.Indicator(
@@ -170,7 +166,20 @@ fig9.add_trace(go.Indicator(
 ), 2, 2)
 
 
+#indicators
 
+# 2 wykresy aby wyswietlic dane liczbowe
+fig10 = make_subplots(1, 2, specs=[[{'type':'domain'}, {'type':'domain'}]],
+                    subplot_titles=['SUMA KOREPETYCJE', 'LICZBA MIESIECY DO SPŁATY KREDYTU'])
+
+
+#suma korepetycje
+fig10.add_trace(go.Indicator(mode = "number+delta",value = korki_teraz,number = {'prefix': "zł"},delta =
+{'position': "top", 'reference': korki_poprzednio, "valueformat": "f"},domain = {'x': [0, 1], 'y': [0, 1]}), 1, 1)
+
+#suma miesiace
+fig10.add_trace(go.Indicator(mode = "number+delta",value = ilosc_miesiecy,number = {'prefix': "l. mies."},delta =
+{'position': "top", 'reference': korki_poprzednio, "valueformat": "f"},domain = {'x': [0, 1], 'y': [0, 1]}), 1, 2)
 
 
 
@@ -200,6 +209,10 @@ app.layout = html.Div(children=[
     dcc.Graph(
         id='example-graph11',
         figure=fig9
+    ),
+    dcc.Graph(
+        id='example-graph12',
+        figure=fig10
     ),
 
     dcc.Graph(
