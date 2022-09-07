@@ -56,12 +56,15 @@ korki_sierp_kwota=korki_sierp['Cost']
 korki_wrzes_kwota=korki_wrzes['Cost']
 
 korki_teraz=df3
-korki_teraz=korki_teraz[korki_teraz.Month =="08 August"]
+korki_teraz=korki_teraz[korki_teraz.Month =="09 September"]
 korki_teraz=korki_teraz[korki_teraz.Send == "Yes"]
+korki_poprzednio=df3
+korki_poprzednio=korki_poprzednio[korki_poprzednio.Month =="08 August"]
+korki_poprzednio=korki_poprzednio[korki_poprzednio.Send == "Yes"]
 
 
 #wartosci do zmian:
-autosplata=6000
+autosplata=6100
 stankont_teraz=skonta_wrzes_stan.sum()
 stankont_poprzednio=skonta_sierp_stan.sum()
 wydatki_teraz=wydatki_wrzes_kwota.sum()
@@ -69,7 +72,7 @@ wydatki_poprzednio=wydatki_sierp_kwota.sum()
 gielda_teraz=5930
 gielda_poprzednio=0
 korki_teraz=korki_teraz["Cost"].sum()
-korki_poprzednio=0
+korki_poprzednio=korki_poprzednio["Cost"].sum()
 ilosc_miesiecy=(30000-autosplata)/500
 
 
