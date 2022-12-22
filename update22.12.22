@@ -1,0 +1,304 @@
+# Run this app with `python app.py` and
+# visit http://127.0.0.1:8050/ in your web browser.
+
+from dash import Dash, html, dcc
+import plotly.express as px
+import pandas as pd
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+import dash_bootstrap_components as dbc
+app = Dash(__name__)
+
+excel="Book2.xlsx"
+
+#arkusze
+
+#df - arkusz 2 dotyczacy stanu kont
+df=pd.read_excel(excel,sheet_name='Book2')
+skonta_sierp=df
+skonta_sierp=skonta_sierp[skonta_sierp.Month == "08 August"]
+skonta_sierp_stan=skonta_sierp['Money']
+skonta_lip=df
+skonta_lip=skonta_lip[skonta_lip.Month == "07 July"]
+skonta_lip_stan=skonta_lip['Money']
+skonta_wrzes=df
+
+#tutaj zmiana!!
+skonta_paz=skonta_wrzes[skonta_wrzes.Month == "01 January"]
+skonta_paz_stan=skonta_paz['Money']
+
+
+skonta_wrzes=skonta_wrzes[skonta_wrzes.Month == "09 September"]
+skonta_wrzes_stan=skonta_wrzes['Money']
+
+
+
+#df1 - arkusz 3 dotyczacy planera rozdysponowania miesiecznych zarobkow
+df1=pd.read_excel(excel,sheet_name='Book3')
+zarobki_wrz=df1
+zarobki_wrz=zarobki_wrz[zarobki_wrz.Month == "09 September"]
+zarobki_wrz_kwota=zarobki_wrz['Money1']
+zarobki_sier=df1
+zarobki_sier=zarobki_sier[zarobki_sier.Month == "08 August"]
+zarobki_sier_kwota=zarobki_sier['Money1']
+zarobki_paz=df1
+zarobki_paz=zarobki_paz[zarobki_paz.Month == "10 October"]
+zarobki_paz_kwota=zarobki_paz['Money1']
+zarobki_list=df1
+zarobki_list=zarobki_list[zarobki_list.Month == "11 November"]
+zarobki_list_kwota=zarobki_list['Money1']
+#df2 - arkusz 4 dotyczacy miesiecznych wydatków
+df2=pd.read_excel(excel,sheet_name='Book4')
+wydatki_sierp=df2
+wydatki_sierp=wydatki_sierp[wydatki_sierp.Month == "08 August"]
+wydatki_sierp_kwota=wydatki_sierp['Money2']
+wydatki_wrzes=df2
+wydatki_wrzes=wydatki_wrzes[wydatki_wrzes.Month == "09 September"]
+wydatki_wrzes_kwota=wydatki_wrzes['Money2']
+wydatki_paz=df2
+wydatki_paz=wydatki_paz[wydatki_paz.Month == "10 October"]
+wydatki_paz_kwota=wydatki_paz['Money2']
+wydatki_list=df2
+wydatki_list=wydatki_list[wydatki_list.Month == "11 November"]
+wydatki_list_kwota=wydatki_list['Money2']
+
+#df3 - arkusz 5 dotyczacy korepetycji
+df3=pd.read_excel(excel,sheet_name='Book5')
+korki_sierp=df3[df3.Month == "08 August"]
+korki_wrzes= df3[df3.Month == "09 September"]
+korki_sierp= korki_sierp[korki_sierp.Send == "Yes"]
+korki_wrzes= korki_wrzes[korki_wrzes.Send == "Yes"]
+korki_sierp_kwota=korki_sierp['Cost']
+korki_wrzes_kwota=korki_wrzes['Cost']
+korki_pazd=df3[df3.Month == "10 October"]
+korki_pazd=korki_pazd[korki_pazd.Send == "Yes"]
+korki_pazd_kwota=korki_pazd['Cost']
+korki_list= df3[df3.Month == "11 November"]
+korki_list= korki_list[korki_list.Send == "Yes"]
+korki_list_kwota=korki_list['Cost']
+
+korki_teraz=df3
+korki_teraz=korki_teraz[korki_teraz.Month =="11 November"]
+korki_teraz=korki_teraz[korki_teraz.Send == "Yes"]
+korki_poprzednio=df3
+korki_poprzednio=korki_poprzednio[korki_poprzednio.Month =="10 October"]
+korki_poprzednio=korki_poprzednio[korki_poprzednio.Send == "Yes"]
+
+
+#wartosci do zmian:
+autosplata=10000
+stankont_teraz=23306
+stankont_poprzednio=22882
+wydatki_teraz=7068
+wydatki_poprzednio=4609
+gielda_teraz=6485
+gielda_poprzednio=6222
+korki_teraz=korki_teraz["Cost"].sum()
+korki_poprzednio=korki_poprzednio["Cost"].sum()
+ilosc_miesiecy=(30000-autosplata)/500
+
+
+#wykres pierwszy treemap dla stanu kont
+fig = px.treemap(skonta_paz,path=['Account'],values=skonta_paz_stan,title="Stan Kont Bankowych Dla Ostatniego Miesiąca:")
+#co jest wyswietlane
+fig.data[0].textinfo = 'label+value'
+#wielkosc tekstu
+fig.update_layout(uniformtext_minsize=16, uniformtext_mode='hide')
+
+#wykres porownojacy stan kont miesiac po miesiacu
+fig8 = px.histogram(df, x="Account", y="Money",
+             color="Month",barmode='group',
+             height=400,title="Stan Kont w każdym miesiącc:").update_xaxes(categoryorder="total descending")
+
+
+
+
+#podwojny wykres kołowy dla planowanych zarobków
+fig5 = make_subplots(1, 4, specs=[[{'type':'domain'}, {'type':'domain'}, {'type':'domain'}, {'type':'domain'}]],
+                    subplot_titles=['Sierpień Pensja', 'Wrzesień Pensja', 'Pazdziernik Pensja', 'Listopad Pensja'])
+#fig5.add_trace(px.pie(df1,values=sales1,names=df1["Goal"], title='Pensja, rozplanowanie'), 1, 1)
+fig5.add_trace(go.Pie(labels=zarobki_sier["Goal"], values=zarobki_sier_kwota,
+                     name="Miesiac Sierpień 2022"), 1, 1)
+fig5.add_trace(go.Pie(labels=zarobki_wrz["Goal"], values=zarobki_wrz_kwota,
+                     name="Miesiac Wrzesien 2022"), 1, 2)
+fig5.add_trace(go.Pie(labels=zarobki_paz["Goal"], values=zarobki_paz_kwota,
+                     name="Miesiac Pazdziernik 2022"), 1, 3)
+fig5.add_trace(go.Pie(labels=zarobki_list["Goal"], values=zarobki_list_kwota,
+                     name="Miesiac Pazdziernik 2022"), 1, 4)
+fig5.update_traces(textposition='inside', textinfo='percent+label+value')
+fig5.update_layout(
+    autosize=False,
+    width=1400,
+    height=700,
+    )
+
+#wykres liniowy dla stanu kont
+c=df
+c=c.groupby(['Month']).sum()
+fig13 = px.line(c, x=c.index, y=c["Money"],title="STAN KONT")
+
+
+#wykres liniowy dla wydatkow
+b=df2
+b=b.groupby(['Month']).sum()
+fig12 = px.line(b, x=b.index, y=b["Money2"],title="WYDATKI")
+
+#podwojny wykres kołowy dla wydatkow miesiecznych
+fig6 = make_subplots(1, 4, specs=[[{'type':'domain'}, {'type':'domain'}, {'type':'domain'}, {'type':'domain'}]],
+                    subplot_titles=['Sierpień Wydatki', 'Wrzesień Wydatki', 'Październik Wydatki', 'Listopad Wydatki'])
+
+#fig5.add_trace(px.pie(df1,values=sales1,names=df1["Goal"], title='Pensja, rozplanowanie'), 1, 1)
+fig6.add_trace(go.Pie(labels=wydatki_sierp["Category"], values=wydatki_sierp_kwota,
+                     name="Miesiac Sierpień 2022"), 1, 1)
+fig6.add_trace(go.Pie(labels=wydatki_wrzes["Category"], values=wydatki_wrzes_kwota,
+                     name="Miesiac Wrzesień 2022"), 1, 2)
+fig6.add_trace(go.Pie(labels=wydatki_paz["Category"], values=wydatki_paz_kwota,
+                     name="Miesiac Pazdziernik 2022"), 1, 3)
+fig6.add_trace(go.Pie(labels=wydatki_list["Category"], values=wydatki_list_kwota,
+                     name="Miesiac Pazdziernik 2022"), 1, 4)
+fig6.update_traces(textposition='inside', textinfo='percent+label+value')
+fig6.update_layout(
+    autosize=False,
+    width=1400,
+    height=700,
+    )
+
+#wykres liniowy dla korepetycji
+a=df3[df3.Send == "Yes"]
+a=a.groupby(['Month']).sum()
+fig11 = px.line(a, x=a.index, y=a["Cost"],title="KOREPETYCJE")
+
+
+
+#podwojny wykres kołowy dla korepetycji
+fig7 = make_subplots(1, 4, specs=[[{'type':'domain'}, {'type':'domain'}, {'type':'domain'}, {'type':'domain'}]],
+                    subplot_titles=['Korepetycje Sierpień', 'Korepetycje Wrzesień', 'Korepetycje Październik', 'Korepetycje Listopad'])
+#fig5.add_trace(px.pie(df1,values=sales1,names=df1["Goal"], title='Pensja, rozplanowanie'), 1, 1)
+fig7.add_trace(go.Pie(labels=korki_sierp["Name"], values=korki_sierp_kwota,
+                     name="Miesiac Wrzesien 2022"), 1, 1)
+fig7.add_trace(go.Pie(labels=korki_wrzes["Name"], values=korki_wrzes_kwota,
+                     name="Miesiac Wrzesien 2022"), 1, 2)
+fig7.add_trace(go.Pie(labels=korki_pazd["Name"], values=korki_pazd_kwota,
+                     name="Miesiac Październik 2022"), 1, 3)
+fig7.add_trace(go.Pie(labels=korki_list["Name"], values=korki_list_kwota,
+                     name="Miesiac Listopad 2022"), 1,4)
+fig7.update_traces(textposition='inside', textinfo='percent+label+value')
+fig7.update_layout(
+    autosize=False,
+    width=1400,
+    height=700,
+    )
+
+
+#indicators
+
+# 4 wykresy aby wyswietlic dane liczbowe
+fig9 = make_subplots(2, 2, specs=[[{'type':'domain'}, {'type':'domain'}],[{'type':'domain'}, {'type':'domain'}]],
+                    subplot_titles=['SUMA WSZYSTKICH KONT', 'SUMA WYDATKÓW', 'SUMA GIEŁDA', ''])
+
+
+#suma wszystkich kont (poprzedni i ten miesiac)
+fig9.add_trace(go.Indicator(mode = "number+delta",value = stankont_teraz,number = {'prefix': "zł"},delta =
+{'position': "top", 'reference': stankont_poprzednio, "valueformat": "f"},domain = {'x': [0, 1], 'y': [0, 1]}), 1, 1)
+
+#suma wydatki wszystkie (poprzedni i ten miesiac)
+fig9.add_trace(go.Indicator(mode = "number+delta",value = wydatki_teraz,number = {'prefix': "zł"},delta =
+{'position': "top", 'reference': wydatki_poprzednio, "valueformat": "f"},domain = {'x': [0, 1], 'y': [0, 1]}), 1, 2)
+
+#suma giełda (poprzedni i ten miesiac)
+fig9.add_trace(go.Indicator(mode = "number+delta",value = gielda_teraz,number = {'prefix': "zł"},delta =
+{'position': "top", 'reference': gielda_poprzednio, "valueformat": "f"},domain = {'x': [0, 1], 'y': [0, 1]}), 2, 1)
+
+#wykres spłata kredytów
+fig9.add_trace(go.Indicator(
+    mode = "gauge+number",
+    number = {'prefix': "zł","valueformat": ".0f"},
+    value = autosplata,
+    title = {'text': "KREDYT"},
+    domain = {'x': [0, 1], 'y': [0, 1]},
+    gauge = {'axis': {'range': [-2, 30000]}}
+), 2, 2)
+
+
+#indicators
+
+# 2 wykresy aby wyswietlic dane liczbowe
+fig10 = make_subplots(1, 2, specs=[[{'type':'domain'}, {'type':'domain'}]],
+                    subplot_titles=['SUMA KOREPETYCJE', 'LICZBA MIESIECY DO SPŁATY KREDYTU'])
+
+
+#suma korepetycje
+fig10.add_trace(go.Indicator(mode = "number+delta",value = korki_teraz,number = {'prefix': "zł"},delta =
+{'position': "top", 'reference': korki_poprzednio, "valueformat": "f"},domain = {'x': [0, 1], 'y': [0, 1]}), 1, 1)
+
+#suma miesiace
+fig10.add_trace(go.Indicator(mode = "number+delta",value = ilosc_miesiecy,number = {'prefix': "l. mies."},delta =
+{'position': "top", 'reference': korki_poprzednio, "valueformat": "f"},domain = {'x': [0, 1], 'y': [0, 1]}), 1, 2)
+
+
+
+
+#pliki strony
+app.layout = html.Div(children=[
+    html.H1(children='PODSUMOWANIE FINANSÓW'),
+
+    html.Div(children='''
+        Na podstawie danych własnych
+    '''),
+
+    dcc.Graph(
+        id='example-graph',
+        figure=fig
+    ),
+    dcc.Graph(
+        id='example-graph22',
+        figure=fig13
+    ),
+    #dcc.Graph(
+    #    id='example-graph1',
+    #    figure=fig1
+    #)
+#,
+    #dcc.Graph(
+    #    id='example-graph2',
+    #    figure=fig2
+    #)
+#,
+    dcc.Graph(
+        id='example-graph11',
+        figure=fig9
+    ),
+    dcc.Graph(
+        id='example-graph12',
+        figure=fig10
+    ),
+
+    dcc.Graph(
+        id='example-graph3',
+        figure=fig8
+    ),
+    dcc.Graph(
+        id='example-graph21',
+        figure=fig12
+    ),
+    dcc.Graph(
+        id='example-graph4',
+        figure=fig6
+    ),    dcc.Graph(
+        id='example-graph20',
+        figure=fig11
+    )
+
+    ,    dcc.Graph(
+        id='example-graph5',
+        figure=fig7
+    ),
+   dcc.Graph(
+        id='example-graph6',
+        figure=fig5
+    )
+
+])
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
